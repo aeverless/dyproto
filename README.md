@@ -1,7 +1,6 @@
 # dyproto
 
-**dyproto** contains the implementation of a simple binary protocol that can be used
-to transfer data in the form of trivially copyable objects or containers thereof.
+**dyproto** contains the implementation of a simple binary serialization library for trivially copyable types and containers thereof.
 
 ## Primary Features
 
@@ -10,6 +9,10 @@ to transfer data in the form of trivially copyable objects or containers thereof
 - **Customizability**, because you can write your own types that satisfy the aforementioned specific concepts; moreover, you can read and write your own structural types so long as they're trivially copyable
 
 Note that while write functions return write results, read functions return objects of type that you are trying to read and assert that the underlying buffer has enough space to read from.
+
+Also note, structural types **may not** be correctly serialized and deserialized because current endianness conversion does not properly account for member variables.
+
+Do note use this toy library in production.
 
 ## Examples
 
@@ -31,13 +34,13 @@ Reading and writing one object at a time:
 
 ```cpp
 w.write<std::int32_t>(64);
-assert(r.read<std::int32_t> == 64);
+assert(r.read<std::int32_t>() == 64);
 
 w.write<std::uint8_t>(128);
 w.write<std::vector<std::int64_t>>({-67, -65, 12, 42, -42, 91, 67});
 
 assert(128 == r.read<std::uint8_t>());
-assert(std::vector<std::int64_t>{-67, -65, 12, 42, -42, 91, 67}, r.read<std::vector<std::int64_t>>());
+assert(std::vector<std::int64_t>{-67, -65, 12, 42, -42, 91, 67} == r.read<std::vector<std::int64_t>>());
 ```
 
 Reading and writing several objects at a time:
@@ -85,10 +88,10 @@ for (std::size_t i = 0; ; ++i)
 
 ## Concepts
 
-The protocol contains three library concepts that can be applied to various types:
+The library contains four library concepts that can be applied to various types:
 
 - `dyproto::traits::argument` models an *argument*,
-  i.e. an object that can be read and written
+  i.e. an object that can be read and written that is not a function and not a pointer
 
 - `dyproto::traits::trivial_argument` models a *trivial argument*,
   i.e. a trivially copyable object
@@ -117,11 +120,11 @@ The following STL containers satisfy the *container argument* requirements:
 - `std::vector<T>` for any `T`
 - `std::list<T>` for any `T`
 
-Non-default allocators haven't been tested for but shouldn't be a problem in practice.
+Non-default allocators haven't been tested for.
 
 ## License
 
-The library is licensed under either the [MIT License](LICENSE-MIT) or the [Apache-2.0 License](LICENSE-APACHE), at your option.
+The library is licensed under the [MIT License](LICENSE).
 
 ## Authors
 

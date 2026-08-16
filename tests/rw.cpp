@@ -77,7 +77,7 @@ auto is_argument_io_coherent(T const& argument, std::size_t times = 1) -> bool
 
 	for (std::size_t i = 0; i < times; ++i)
 	{
-		w.write<T>(argument);
+		std::ignore = w.write<T>(argument);
 	}
 
 	dyproto::reader r{bytes};

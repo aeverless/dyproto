@@ -3,6 +3,8 @@
 
 #include "traits.hpp"
 
+#include <array>
+#include <cstdint>
 #include <algorithm>
 #include <bit>
 #include <cassert>
@@ -22,7 +24,7 @@ struct [[nodiscard]] reader
 		requires (sizeof...(Ts) > 1)
 	constexpr auto read() -> std::tuple<Ts...>
 	{
-		return std::make_tuple(read<Ts>()...);
+		return std::tuple{read<Ts>()...};
 	}
 
 	template <traits::trivial_argument T>
@@ -50,11 +52,11 @@ struct [[nodiscard]] reader
 	template <traits::container_argument T>
 	constexpr auto read() -> T
 	{
-		static constexpr std::uint8_t max_array_size = 255;
-
 		assert(buf_.size() >= 1);
 
-		auto const n = std::min(max_array_size, static_cast<std::uint8_t>(buf_.front()));
+		auto const n = static_cast<std::uint8_t>(buf_.front());
+
+		assert(buf_.size() >= 1 + n * sizeof(typename T::value_type));
 
 		buf_ = buf_.subspan<1>();
 
